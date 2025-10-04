@@ -114,9 +114,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       queryWords.forEach(word => {
         const relatedGenres = moodToGenreMap[word] || [];
         if (relatedGenres.length > 0) {
-          relatedGenres.forEach(genre => {
-            searchQueries.push(`subject:"${genre}"`);
-          });
+          const randomIndex = Math.floor((randomSeed + word.charCodeAt(0)) % relatedGenres.length);
+          const selectedGenre = relatedGenres[randomIndex];
+          searchQueries.push(`subject:"${selectedGenre}"`);
         } else {
           searchQueries.push(`subject:"${word}"`);
         }
@@ -126,8 +126,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchQueries.push(mood);
       }
 
-      const searchQuery = searchQueries.slice(0, 3).join(' OR ');
-      const startIndex = (randomSeed % 20) * 5;
+      const searchQuery = searchQueries.join(' ');
+      const startIndex = (randomSeed % 100) * 4;
       const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=40&printType=books&orderBy=relevance&startIndex=${startIndex}`;
       
       const response = await fetch(url);
