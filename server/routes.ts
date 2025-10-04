@@ -158,8 +158,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      const booksWithCovers = booksToScore.filter((item: any) => item.volumeInfo?.imageLinks);
+      
       const uniqueBooks = new Map();
-      const scoredBooks = booksToScore
+      const scoredBooks = booksWithCovers
         .map((item: any) => ({
           item,
           score: calculateRelevanceScore(item, mood) + (Math.random() * 10)
@@ -190,8 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             publishedDate: vol.publishedDate || '',
             averageRating: vol.averageRating
           };
-        })
-        .filter((book: Book) => book.coverUrl);
+        });
 
       return res.json({ books });
     } catch (error) {
