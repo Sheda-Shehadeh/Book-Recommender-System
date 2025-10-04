@@ -47,6 +47,24 @@ const fictionCategories = [
   'comics'
 ];
 
+const nonFictionKeywords = [
+  'encyclopedia',
+  'reference',
+  'textbook',
+  'handbook',
+  'manual',
+  'guide to',
+  'introduction to',
+  'linguistics',
+  'language arts',
+  'educational',
+  'academic',
+  'study guide',
+  'companion to',
+  'dictionary',
+  'anthology of essays'
+];
+
 function calculateRelevanceScore(book: any, moodQuery: string): number {
   let score = 0;
   const query = moodQuery.toLowerCase();
@@ -54,6 +72,8 @@ function calculateRelevanceScore(book: any, moodQuery: string): number {
   
   const volumeInfo = book.volumeInfo || {};
   const categories = (volumeInfo.categories || []).map((c: string) => c.toLowerCase());
+  const description = (volumeInfo.description || '').toLowerCase();
+  const title = (volumeInfo.title || '').toLowerCase();
   
   if (categories.length === 0) {
     return 0;
@@ -67,26 +87,43 @@ function calculateRelevanceScore(book: any, moodQuery: string): number {
     return 0;
   }
   
-  let hasGenreMatch = false;
+  const hasNonFictionIndicators = nonFictionKeywords.some(keyword => 
+    description.includes(keyword) || title.includes(keyword)
+  );
+  
+  if (hasNonFictionIndicators) {
+    return 0;
+  }
+  
+  let categoryScore = 0;
+  let descriptionScore = 0;
   
   queryWords.forEach((word: string) => {
     if (categories.some((cat: string) => cat.includes(word))) {
-      score += 20;
-      hasGenreMatch = true;
+      categoryScore += 25;
     }
     
     const relatedGenres = moodToGenreMap[word] || [];
     relatedGenres.forEach(genre => {
       if (categories.some((cat: string) => cat.includes(genre.toLowerCase()))) {
-        score += 15;
-        hasGenreMatch = true;
+        categoryScore += 20;
+      }
+      
+      if (description.includes(genre.toLowerCase())) {
+        descriptionScore += 8;
       }
     });
+    
+    if (description.includes(word) && word.length > 3) {
+      descriptionScore += 5;
+    }
   });
   
-  if (!hasGenreMatch) {
+  if (categoryScore === 0) {
     return 0;
   }
+  
+  score = categoryScore + descriptionScore;
   
   return score;
 }
