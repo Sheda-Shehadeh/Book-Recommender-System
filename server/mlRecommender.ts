@@ -50,9 +50,23 @@ export function getRecommendations(query: string, limit: number = 10): CMUBook[]
   
   tfidf.tfidfs(filteredQuery, (docIndex: number, measure: number) => {
     if (measure > 0 && booksWithVectors[docIndex]) {
+      const book = booksWithVectors[docIndex].book;
+      let finalScore = measure;
+      
+      // Check if query matches any genre
+      const bookGenres = Object.values(book.genres).map(g => g.toLowerCase());
+      const queryLower = query.toLowerCase();
+      
+      if (bookGenres.some(genre => 
+        genre.includes(queryLower) || queryLower.includes(genre)
+      )) {
+        // Massively boost score if genre matches
+        finalScore *= 100;
+      }
+      
       scores.push({
-        book: booksWithVectors[docIndex].book,
-        score: measure
+        book: book,
+        score: finalScore
       });
     }
   });
