@@ -21,7 +21,9 @@ export async function loadBooksData(): Promise<void> {
       .pipe(parse({
         delimiter: '\t',
         columns: false,
-        skip_empty_lines: true
+        skip_empty_lines: true,
+        quote: false,
+        relax_quotes: true
       }))
       .on('data', (row: string[]) => {
         try {
