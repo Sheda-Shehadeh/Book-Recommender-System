@@ -40,10 +40,8 @@ export const MacbookPro = (): JSX.Element => {
     { id: 25, title: "The Maze Runner", author: "James Dashner", isbn: "9780385737951", moods: ["young adult", "dystopian", "thriller", "action"] },
   ];
 
-  const getBookCover = (isbn: string) => {
-    return `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
-  };
-
+  const [bookCovers, setBookCovers] = React.useState<Record<string, string>>({});
+  
   const [popularBooks] = React.useState(() => {
     const shuffled = [...allBooks].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 5);
@@ -52,6 +50,32 @@ export const MacbookPro = (): JSX.Element => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [recommendedBooks, setRecommendedBooks] = React.useState<Book[]>([]);
   const [showRecommendations, setShowRecommendations] = React.useState(false);
+
+  const fetchBookCover = async (isbn: string) => {
+    if (bookCovers[isbn]) return bookCovers[isbn];
+    
+    try {
+      const response = await fetch(`/api/book-cover/${isbn}`);
+      if (response.ok) {
+        const data = await response.json();
+        setBookCovers(prev => ({ ...prev, [isbn]: data.coverUrl }));
+        return data.coverUrl;
+      }
+    } catch (error) {
+      console.error("Error fetching cover:", error);
+    }
+    return null;
+  };
+
+  React.useEffect(() => {
+    popularBooks.forEach(book => fetchBookCover(book.isbn));
+  }, []);
+
+  React.useEffect(() => {
+    if (showRecommendations) {
+      recommendedBooks.forEach(book => fetchBookCover(book.isbn));
+    }
+  }, [recommendedBooks, showRecommendations]);
 
   const moodCategories = [
     { id: 1, name: "Mystery", icon: SearchIcon, color: "#8b7355" },
@@ -139,16 +163,15 @@ export const MacbookPro = (): JSX.Element => {
                 {recommendedBooks.map((book) => (
                   <div key={book.id} className="flex flex-col items-center gap-3">
                     <Card className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
-                      <img 
-                        src={getBookCover(book.isbn)} 
-                        alt={book.title} 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.parentElement!.style.backgroundColor = '#d9d9d9';
-                        }}
-                      />
+                      {bookCovers[book.isbn] ? (
+                        <img 
+                          src={bookCovers[book.isbn]} 
+                          alt={book.title} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-[#d9d9d9]" />
+                      )}
                     </Card>
                     <div className="text-center max-w-[149px]">
                       <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight">
@@ -172,16 +195,15 @@ export const MacbookPro = (): JSX.Element => {
               {popularBooks.map((book) => (
                 <div key={book.id} className="flex flex-col items-center gap-3">
                   <Card className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
-                    <img 
-                      src={getBookCover(book.isbn)} 
-                      alt={book.title} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.parentElement!.style.backgroundColor = '#d9d9d9';
-                      }}
-                    />
+                    {bookCovers[book.isbn] ? (
+                      <img 
+                        src={bookCovers[book.isbn]} 
+                        alt={book.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[#d9d9d9]" />
+                    )}
                   </Card>
                   <div className="text-center max-w-[149px]">
                     <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight">
