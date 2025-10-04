@@ -305,7 +305,7 @@ export const MacbookPro = (): JSX.Element => {
                 placeholder="What are you in the mood for?"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-[81px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-16 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black text-[32px] placeholder:text-[32px] placeholder:text-black placeholder:opacity-100"
+                className="w-full h-[70px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-16 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black text-[25px] placeholder:text-[20px] placeholder:text-gray-500 placeholder:opacity-100"
               />
             </form>
           </section>
