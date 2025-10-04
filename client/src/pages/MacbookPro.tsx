@@ -116,16 +116,16 @@ export const MacbookPro = (): JSX.Element => {
               <div className="flex justify-center gap-[100px] flex-wrap">
                 {recommendedBooks.map((book) => (
                   <div key={book.id} className="flex flex-col items-center gap-3">
-                    <Card 
+                    <div 
                       data-testid={`card-book-${book.id}`}
-                      className="w-[149px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden p-0"
+                      className="w-[149px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                     >
                       <img 
                         src={book.coverUrl} 
                         alt={book.title} 
                         className="w-full h-full object-cover block"
                       />
-                    </Card>
+                    </div>
                     <div className="text-center max-w-[149px]">
                       <p 
                         data-testid={`text-title-${book.id}`}
