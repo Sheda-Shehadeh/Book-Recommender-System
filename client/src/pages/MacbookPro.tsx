@@ -198,9 +198,9 @@ export const MacbookPro = (): JSX.Element => {
                     <Card 
                       onClick={() => handleMoodClick(category.name)}
                       data-testid={`button-mood-${category.name.toLowerCase()}`}
-                      className="w-[159px] h-[134px] bg-[#fdeed1] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity flex flex-col items-center justify-center gap-2"
+                      className="w-[130px] h-[110px] bg-[#fdeed1] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity flex flex-col items-center justify-center gap-2"
                     >
-                      <Icon className="w-10 h-10" style={{ color: category.color }} />
+                      <Icon className="w-8 h-8" style={{ color: category.color }} />
                       <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-lg">
                         {category.name}
                       </p>
