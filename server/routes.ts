@@ -88,10 +88,6 @@ function calculateRelevanceScore(book: any, moodQuery: string): number {
     return 0;
   }
   
-  if (volumeInfo.averageRating && volumeInfo.averageRating >= 3.5) {
-    score += (volumeInfo.averageRating - 3) * 4;
-  }
-  
   return score;
 }
 
@@ -179,6 +175,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const scoredBooks = booksToScore
         .map((item: any) => {
           const baseScore = calculateRelevanceScore(item, mood);
+          
+          if (baseScore === 0) {
+            return {
+              item,
+              score: 0
+            };
+          }
+          
           const ratingBonus = (item.volumeInfo?.averageRating || 0) * 5;
           const randomFactor = Math.random() * 8;
           const totalScore = baseScore + ratingBonus + randomFactor;
@@ -188,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             score: totalScore
           };
         })
-        .filter((scored: any) => scored.score > 10)
+        .filter((scored: any) => scored.score > 0)
         .sort((a: any, b: any) => b.score - a.score)
         .filter((scored: any) => {
           if (uniqueBooks.has(scored.item.id)) {
