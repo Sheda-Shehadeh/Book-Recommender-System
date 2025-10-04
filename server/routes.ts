@@ -117,10 +117,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const scoredBooks = Array.from(uniqueBooks.values())
-        .sort((a, b) => b.score - a.score)
+        .map(item => ({
+          ...item,
+          randomBoost: Math.random() * 15
+        }))
+        .sort((a, b) => (b.score + b.randomBoost) - (a.score + a.randomBoost))
+        .slice(0, limit * 2);
+
+      const selectedBooks = scoredBooks
+        .sort(() => Math.random() - 0.5)
         .slice(0, limit);
 
-      const books: Book[] = scoredBooks.map(({ book }) => convertCMUBookToBook(book));
+      const books: Book[] = selectedBooks.map(({ book }) => convertCMUBookToBook(book));
 
       return res.json({ books });
     } catch (error) {
