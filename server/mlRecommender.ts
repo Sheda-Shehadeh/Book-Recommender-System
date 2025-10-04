@@ -57,15 +57,17 @@ export function getRecommendations(query: string, limit: number = 10): CMUBook[]
   
   scores.sort((a, b) => b.score - a.score);
   
-  const topBooks = scores.slice(0, limit * 2);
+  const topBooks = scores.slice(0, Math.min(scores.length, limit * 4));
   
   const shuffled = topBooks
     .map(item => ({
       ...item,
-      randomBoost: Math.random() * 0.3
+      finalScore: item.score * (0.7 + Math.random() * 0.6)
     }))
-    .sort((a, b) => (b.score + b.randomBoost) - (a.score + a.randomBoost))
+    .sort((a, b) => b.finalScore - a.finalScore)
     .slice(0, limit);
+  
+  shuffled.sort(() => Math.random() - 0.5);
   
   return shuffled.map(item => item.book);
 }
