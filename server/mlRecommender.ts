@@ -44,8 +44,6 @@ export function getRecommendations(query: string, limit: number = 10): CMUBook[]
   const queryTokens = tokenizer.tokenize(query.toLowerCase());
   const filteredQuery = removeStopwords(queryTokens || []).join(' ');
   
-  console.log(`\nSearching for: "${query}" (processed: "${filteredQuery}")`);
-  
   const scores: { book: CMUBook; score: number }[] = [];
   
   tfidf.tfidfs(filteredQuery, (docIndex: number, measure: number) => {
@@ -71,8 +69,6 @@ export function getRecommendations(query: string, limit: number = 10): CMUBook[]
     }
   });
   
-  console.log(`Found ${scores.length} books with scores > 0`);
-  
   const shuffled = scores
     .map(item => ({
       ...item,
@@ -82,12 +78,6 @@ export function getRecommendations(query: string, limit: number = 10): CMUBook[]
     .slice(0, limit);
   
   shuffled.sort(() => Math.random() - 0.5);
-  
-  console.log(`Top ${shuffled.length} books:`);
-  shuffled.slice(0, 3).forEach(item => {
-    const genres = Object.values(item.book.genres).join(', ');
-    console.log(`  - "${item.book.title}" | Genres: [${genres}]`);
-  });
   
   return shuffled.map(item => item.book);
 }
