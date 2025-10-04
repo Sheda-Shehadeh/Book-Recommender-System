@@ -391,7 +391,7 @@ export const MacbookPro = (): JSX.Element => {
                   >
                     <Card
                       onClick={() => handleMoodClick(category.name)}
-                      className="w-[159px] h-[134px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity flex flex-col items-center justify-center gap-2"
+                      className="w-[159px] h-[134px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity flex flex-col items-center justify-center gap-2"
                     >
                       <Icon
                         className="w-10 h-10"
