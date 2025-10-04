@@ -109,63 +109,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const moodLower = mood.toLowerCase();
       const queryWords = moodLower.split(/\s+/);
-      let searchQuery = '';
-      let isYoungAdult = false;
       
-      if (moodLower.includes('young adult') || moodLower.includes('ya') || moodLower.includes('teen')) {
-        searchQuery = 'subject:"young adult fiction"';
-        isYoungAdult = true;
-      } else {
-        const expandedQueries: string[] = [];
-        queryWords.forEach(word => {
-          const relatedGenres = moodToGenreMap[word] || [];
-          if (relatedGenres.length > 0) {
-            const randomIndex = Math.floor((randomSeed + word.charCodeAt(0)) % relatedGenres.length);
-            expandedQueries.push(`subject:${relatedGenres[randomIndex]}`);
-          }
-        });
-        
-        if (expandedQueries.length === 0) {
-          expandedQueries.push(mood);
+      let searchQueries: string[] = [];
+      queryWords.forEach(word => {
+        const relatedGenres = moodToGenreMap[word] || [];
+        if (relatedGenres.length > 0) {
+          relatedGenres.forEach(genre => {
+            searchQueries.push(`subject:"${genre}"`);
+          });
+        } else {
+          searchQueries.push(`subject:"${word}"`);
         }
-        searchQuery = expandedQueries.join(' ');
+      });
+      
+      if (searchQueries.length === 0) {
+        searchQueries.push(mood);
       }
 
-      const startIndex = Math.floor((randomSeed % 50)) * 10;
+      const searchQuery = searchQueries.slice(0, 3).join(' OR ');
+      const startIndex = (randomSeed % 20) * 5;
       const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=40&printType=books&orderBy=relevance&startIndex=${startIndex}`;
+      
       const response = await fetch(url);
       const data = await response.json();
       
       if (!data.items || data.items.length === 0) {
-        return res.json({ books: [] });
-      }
-
-      let booksToScore = data.items;
-      
-      if (isYoungAdult) {
-        const yaBooks = data.items.filter((item: any) => {
-          const categories = (item.volumeInfo?.categories || []).map((c: string) => c.toLowerCase());
-          const description = (item.volumeInfo?.description || '').toLowerCase();
-          return categories.some((cat: string) => 
-            cat.includes('young adult') || 
-            cat.includes('juvenile fiction') || 
-            cat.includes('teen')
-          ) || description.includes('young adult') || description.includes('teen');
-        });
+        const fallbackUrl = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(mood)}&maxResults=40&printType=books&orderBy=relevance`;
+        const fallbackResponse = await fetch(fallbackUrl);
+        const fallbackData = await fallbackResponse.json();
         
-        if (yaBooks.length >= 5) {
-          booksToScore = yaBooks;
+        if (!fallbackData.items || fallbackData.items.length === 0) {
+          return res.json({ books: [] });
         }
+        
+        data.items = fallbackData.items;
       }
 
-      const booksWithCovers = booksToScore.filter((item: any) => item.volumeInfo?.imageLinks);
+      const booksWithDescriptions = data.items.filter((item: any) => 
+        item.volumeInfo?.description && 
+        item.volumeInfo?.description.length > 50
+      );
       
+      const booksToScore = booksWithDescriptions.length >= 10 ? booksWithDescriptions : data.items;
+
       const uniqueBooks = new Map();
-      const scoredBooks = booksWithCovers
-        .map((item: any) => ({
-          item,
-          score: calculateRelevanceScore(item, mood) + (Math.random() * 10)
-        }))
+      const scoredBooks = booksToScore
+        .map((item: any) => {
+          const baseScore = calculateRelevanceScore(item, mood);
+          const ratingBonus = (item.volumeInfo?.averageRating || 0) * 5;
+          const randomFactor = Math.random() * 8;
+          
+          return {
+            item,
+            score: baseScore + ratingBonus + randomFactor
+          };
+        })
         .sort((a: any, b: any) => b.score - a.score)
         .filter((scored: any) => {
           if (uniqueBooks.has(scored.item.id)) {
