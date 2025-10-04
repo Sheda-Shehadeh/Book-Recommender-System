@@ -289,7 +289,7 @@ export const MacbookPro = (): JSX.Element => {
 
         <main className="flex flex-col items-center gap-16">
           <section className="flex flex-col items-center gap-8 w-full max-w-4xl">
-            <h2 className="[font-family:'Playfair_Display',Helvetica] font-normal text-black text-6xl text-center tracking-[0] leading-[normal]">
+            <h2 className="[font-family:'Playfair_Display',Helvetica] font-normal text-black text-5xl text-center tracking-[0] leading-[normal]">
               Find your next favorite read
             </h2>
 
@@ -305,7 +305,7 @@ export const MacbookPro = (): JSX.Element => {
                 placeholder="What are you in the mood for?"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-[60px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-16 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black !text-[20px] placeholder:text-[20px] placeholder:text-gray-500 placeholder:opacity-100"
+                className="w-full h-[60px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-12 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black !text-[20px] placeholder:text-[20px] placeholder:text-gray-500 placeholder:opacity-100"
               />
             </form>
           </section>
