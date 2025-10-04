@@ -95,7 +95,7 @@ export const MacbookPro = (): JSX.Element => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 data-testid="input-search"
-                className="w-full h-[70px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-12 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black text-xl placeholder:text-xl placeholder:text-gray-500 placeholder:opacity-100"
+                className="w-full h-[70px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-12 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black !text-xl placeholder:text-xl placeholder:text-gray-500 placeholder:opacity-100"
               />
             </form>
           </section>
