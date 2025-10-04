@@ -2,43 +2,47 @@ import { SearchIcon, Sparkles, Rocket, Skull, Heart } from "lucide-react";
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import bookCover1 from "@assets/stock_images/book_covers_classic__295b9cdf.jpg";
-import bookCover2 from "@assets/stock_images/book_covers_classic__5ffa13b6.jpg";
-import bookCover3 from "@assets/stock_images/book_covers_classic__493c2412.jpg";
-import bookCover4 from "@assets/stock_images/book_covers_classic__b612314b.jpg";
-import bookCover5 from "@assets/stock_images/book_covers_classic__3aa29ca8.jpg";
 
 interface Book {
   id: number;
   title: string;
   author: string;
-  cover: string;
+  isbn: string;
   moods: string[];
 }
 
 export const MacbookPro = (): JSX.Element => {
   const allBooks: Book[] = [
-    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: bookCover1, moods: ["romance", "drama", "classic"] },
-    { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", cover: bookCover2, moods: ["drama", "classic", "inspiring"] },
-    { id: 3, title: "1984", author: "George Orwell", cover: bookCover3, moods: ["sci-fi", "dystopian", "thriller"] },
-    { id: 4, title: "Pride and Prejudice", author: "Jane Austen", cover: bookCover4, moods: ["romance", "classic", "comedy"] },
-    { id: 5, title: "The Catcher in the Rye", author: "J.D. Salinger", cover: bookCover5, moods: ["drama", "coming-of-age"] },
-    { id: 6, title: "The Hobbit", author: "J.R.R. Tolkien", cover: bookCover1, moods: ["fantasy", "adventure", "classic"] },
-    { id: 7, title: "Harry Potter", author: "J.K. Rowling", cover: bookCover2, moods: ["fantasy", "adventure", "magic"] },
-    { id: 8, title: "The Lord of the Rings", author: "J.R.R. Tolkien", cover: bookCover3, moods: ["fantasy", "adventure", "epic"] },
-    { id: 9, title: "Brave New World", author: "Aldous Huxley", cover: bookCover4, moods: ["sci-fi", "dystopian", "philosophical"] },
-    { id: 10, title: "The Book Thief", author: "Markus Zusak", cover: bookCover5, moods: ["drama", "historical", "heartwarming"] },
-    { id: 11, title: "Dracula", author: "Bram Stoker", cover: bookCover1, moods: ["horror", "gothic", "classic"] },
-    { id: 12, title: "The Shining", author: "Stephen King", cover: bookCover2, moods: ["horror", "thriller", "supernatural"] },
-    { id: 13, title: "Frankenstein", author: "Mary Shelley", cover: bookCover3, moods: ["horror", "sci-fi", "gothic"] },
-    { id: 14, title: "Gone Girl", author: "Gillian Flynn", cover: bookCover4, moods: ["mystery", "thriller", "psychological"] },
-    { id: 15, title: "Sherlock Holmes", author: "Arthur Conan Doyle", cover: bookCover5, moods: ["mystery", "detective", "classic"] },
-    { id: 16, title: "The Da Vinci Code", author: "Dan Brown", cover: bookCover1, moods: ["mystery", "thriller", "adventure"] },
-    { id: 17, title: "Dune", author: "Frank Herbert", cover: bookCover2, moods: ["sci-fi", "epic", "adventure"] },
-    { id: 18, title: "Foundation", author: "Isaac Asimov", cover: bookCover3, moods: ["sci-fi", "space", "philosophical"] },
-    { id: 19, title: "The Notebook", author: "Nicholas Sparks", cover: bookCover4, moods: ["romance", "heartwarming", "emotional"] },
-    { id: 20, title: "Outlander", author: "Diana Gabaldon", cover: bookCover5, moods: ["romance", "adventure", "historical"] },
+    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", isbn: "9780743273565", moods: ["romance", "drama", "classic", "tragic"] },
+    { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", isbn: "9780061120084", moods: ["drama", "classic", "inspiring", "historical"] },
+    { id: 3, title: "1984", author: "George Orwell", isbn: "9780451524935", moods: ["sci-fi", "dystopian", "thriller", "dark"] },
+    { id: 4, title: "Pride and Prejudice", author: "Jane Austen", isbn: "9780141439518", moods: ["romance", "classic", "comedy", "lighthearted"] },
+    { id: 5, title: "The Catcher in the Rye", author: "J.D. Salinger", isbn: "9780316769174", moods: ["drama", "young adult", "coming-of-age"] },
+    { id: 6, title: "The Hobbit", author: "J.R.R. Tolkien", isbn: "9780547928227", moods: ["fantasy", "adventure", "classic", "epic"] },
+    { id: 7, title: "Harry Potter and the Sorcerer's Stone", author: "J.K. Rowling", isbn: "9780590353427", moods: ["fantasy", "adventure", "magic", "young adult"] },
+    { id: 8, title: "The Lord of the Rings", author: "J.R.R. Tolkien", isbn: "9780618640157", moods: ["fantasy", "adventure", "epic", "classic"] },
+    { id: 9, title: "Brave New World", author: "Aldous Huxley", isbn: "9780060850524", moods: ["sci-fi", "dystopian", "philosophical", "thought-provoking"] },
+    { id: 10, title: "The Book Thief", author: "Markus Zusak", isbn: "9780375842207", moods: ["drama", "historical", "heartwarming", "young adult"] },
+    { id: 11, title: "Dracula", author: "Bram Stoker", isbn: "9780486411095", moods: ["horror", "gothic", "classic", "vampire"] },
+    { id: 12, title: "The Shining", author: "Stephen King", isbn: "9780307743657", moods: ["horror", "thriller", "supernatural", "suspense"] },
+    { id: 13, title: "Frankenstein", author: "Mary Shelley", isbn: "9780486282114", moods: ["horror", "sci-fi", "gothic", "classic"] },
+    { id: 14, title: "Gone Girl", author: "Gillian Flynn", isbn: "9780307588371", moods: ["mystery", "thriller", "psychological", "suspense"] },
+    { id: 15, title: "The Adventures of Sherlock Holmes", author: "Arthur Conan Doyle", isbn: "9780486474915", moods: ["mystery", "detective", "classic", "thriller"] },
+    { id: 16, title: "The Da Vinci Code", author: "Dan Brown", isbn: "9780307474278", moods: ["mystery", "thriller", "adventure", "suspense"] },
+    { id: 17, title: "Dune", author: "Frank Herbert", isbn: "9780441172719", moods: ["sci-fi", "epic", "adventure", "space"] },
+    { id: 18, title: "Foundation", author: "Isaac Asimov", isbn: "9780553293357", moods: ["sci-fi", "space", "philosophical", "epic"] },
+    { id: 19, title: "The Notebook", author: "Nicholas Sparks", isbn: "9780446676090", moods: ["romance", "heartwarming", "emotional", "contemporary"] },
+    { id: 20, title: "Outlander", author: "Diana Gabaldon", isbn: "9780440212560", moods: ["romance", "adventure", "historical", "time-travel"] },
+    { id: 21, title: "The Hunger Games", author: "Suzanne Collins", isbn: "9780439023481", moods: ["young adult", "dystopian", "adventure", "action"] },
+    { id: 22, title: "The Fault in Our Stars", author: "John Green", isbn: "9780525478812", moods: ["young adult", "romance", "emotional", "contemporary"] },
+    { id: 23, title: "Percy Jackson: The Lightning Thief", author: "Rick Riordan", isbn: "9780786838653", moods: ["young adult", "fantasy", "adventure", "mythology"] },
+    { id: 24, title: "Divergent", author: "Veronica Roth", isbn: "9780062024039", moods: ["young adult", "dystopian", "action", "romance"] },
+    { id: 25, title: "The Maze Runner", author: "James Dashner", isbn: "9780385737951", moods: ["young adult", "dystopian", "thriller", "action"] },
   ];
+
+  const getBookCover = (isbn: string) => {
+    return `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
+  };
 
   const [popularBooks] = React.useState(() => {
     const shuffled = [...allBooks].sort(() => Math.random() - 0.5);
@@ -58,10 +62,19 @@ export const MacbookPro = (): JSX.Element => {
   ];
 
   const findBooksByMood = (moodQuery: string): Book[] => {
-    const query = moodQuery.toLowerCase();
-    const matchingBooks = allBooks.filter(book => 
-      book.moods.some(mood => mood.includes(query) || query.includes(mood))
-    );
+    const query = moodQuery.toLowerCase().trim();
+    const queryWords = query.split(/\s+/);
+    
+    const matchingBooks = allBooks.filter(book => {
+      return book.moods.some(mood => {
+        const moodWords = mood.toLowerCase().split(/[-\s]+/);
+        return queryWords.some(queryWord => 
+          moodWords.some(moodWord => 
+            moodWord.includes(queryWord) || queryWord.includes(moodWord)
+          )
+        );
+      });
+    });
     
     if (matchingBooks.length === 0) {
       const shuffled = [...allBooks].sort(() => Math.random() - 0.5);
@@ -126,7 +139,16 @@ export const MacbookPro = (): JSX.Element => {
                 {recommendedBooks.map((book) => (
                   <div key={book.id} className="flex flex-col items-center gap-3">
                     <Card className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
-                      <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
+                      <img 
+                        src={getBookCover(book.isbn)} 
+                        alt={book.title} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.parentElement!.style.backgroundColor = '#d9d9d9';
+                        }}
+                      />
                     </Card>
                     <div className="text-center max-w-[149px]">
                       <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight">
@@ -150,7 +172,16 @@ export const MacbookPro = (): JSX.Element => {
               {popularBooks.map((book) => (
                 <div key={book.id} className="flex flex-col items-center gap-3">
                   <Card className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
-                    <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
+                    <img 
+                      src={getBookCover(book.isbn)} 
+                      alt={book.title} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.parentElement!.style.backgroundColor = '#d9d9d9';
+                      }}
+                    />
                   </Card>
                   <div className="text-center max-w-[149px]">
                     <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight">
