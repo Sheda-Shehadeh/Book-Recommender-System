@@ -8,26 +8,45 @@ import bookCover3 from "@assets/stock_images/book_covers_classic__493c2412.jpg";
 import bookCover4 from "@assets/stock_images/book_covers_classic__b612314b.jpg";
 import bookCover5 from "@assets/stock_images/book_covers_classic__3aa29ca8.jpg";
 
+interface Book {
+  id: number;
+  title: string;
+  author: string;
+  cover: string;
+  moods: string[];
+}
+
 export const MacbookPro = (): JSX.Element => {
-  const allPopularBooks = [
-    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: bookCover1 },
-    { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", cover: bookCover2 },
-    { id: 3, title: "1984", author: "George Orwell", cover: bookCover3 },
-    { id: 4, title: "Pride and Prejudice", author: "Jane Austen", cover: bookCover4 },
-    { id: 5, title: "The Catcher in the Rye", author: "J.D. Salinger", cover: bookCover5 },
-    { id: 6, title: "The Hobbit", author: "J.R.R. Tolkien", cover: bookCover1 },
-    { id: 7, title: "Harry Potter", author: "J.K. Rowling", cover: bookCover2 },
-    { id: 8, title: "The Lord of the Rings", author: "J.R.R. Tolkien", cover: bookCover3 },
-    { id: 9, title: "Brave New World", author: "Aldous Huxley", cover: bookCover4 },
-    { id: 10, title: "The Book Thief", author: "Markus Zusak", cover: bookCover5 },
+  const allBooks: Book[] = [
+    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: bookCover1, moods: ["romance", "drama", "classic"] },
+    { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", cover: bookCover2, moods: ["drama", "classic", "inspiring"] },
+    { id: 3, title: "1984", author: "George Orwell", cover: bookCover3, moods: ["sci-fi", "dystopian", "thriller"] },
+    { id: 4, title: "Pride and Prejudice", author: "Jane Austen", cover: bookCover4, moods: ["romance", "classic", "comedy"] },
+    { id: 5, title: "The Catcher in the Rye", author: "J.D. Salinger", cover: bookCover5, moods: ["drama", "coming-of-age"] },
+    { id: 6, title: "The Hobbit", author: "J.R.R. Tolkien", cover: bookCover1, moods: ["fantasy", "adventure", "classic"] },
+    { id: 7, title: "Harry Potter", author: "J.K. Rowling", cover: bookCover2, moods: ["fantasy", "adventure", "magic"] },
+    { id: 8, title: "The Lord of the Rings", author: "J.R.R. Tolkien", cover: bookCover3, moods: ["fantasy", "adventure", "epic"] },
+    { id: 9, title: "Brave New World", author: "Aldous Huxley", cover: bookCover4, moods: ["sci-fi", "dystopian", "philosophical"] },
+    { id: 10, title: "The Book Thief", author: "Markus Zusak", cover: bookCover5, moods: ["drama", "historical", "heartwarming"] },
+    { id: 11, title: "Dracula", author: "Bram Stoker", cover: bookCover1, moods: ["horror", "gothic", "classic"] },
+    { id: 12, title: "The Shining", author: "Stephen King", cover: bookCover2, moods: ["horror", "thriller", "supernatural"] },
+    { id: 13, title: "Frankenstein", author: "Mary Shelley", cover: bookCover3, moods: ["horror", "sci-fi", "gothic"] },
+    { id: 14, title: "Gone Girl", author: "Gillian Flynn", cover: bookCover4, moods: ["mystery", "thriller", "psychological"] },
+    { id: 15, title: "Sherlock Holmes", author: "Arthur Conan Doyle", cover: bookCover5, moods: ["mystery", "detective", "classic"] },
+    { id: 16, title: "The Da Vinci Code", author: "Dan Brown", cover: bookCover1, moods: ["mystery", "thriller", "adventure"] },
+    { id: 17, title: "Dune", author: "Frank Herbert", cover: bookCover2, moods: ["sci-fi", "epic", "adventure"] },
+    { id: 18, title: "Foundation", author: "Isaac Asimov", cover: bookCover3, moods: ["sci-fi", "space", "philosophical"] },
+    { id: 19, title: "The Notebook", author: "Nicholas Sparks", cover: bookCover4, moods: ["romance", "heartwarming", "emotional"] },
+    { id: 20, title: "Outlander", author: "Diana Gabaldon", cover: bookCover5, moods: ["romance", "adventure", "historical"] },
   ];
 
-  const [popularBooks, setPopularBooks] = React.useState(() => {
-    const shuffled = [...allPopularBooks].sort(() => Math.random() - 0.5);
+  const [popularBooks] = React.useState(() => {
+    const shuffled = [...allBooks].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 5);
   });
 
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [recommendedBooks, setRecommendedBooks] = React.useState<Book[]>([]);
   const [showRecommendations, setShowRecommendations] = React.useState(false);
 
   const moodCategories = [
@@ -38,19 +57,35 @@ export const MacbookPro = (): JSX.Element => {
     { id: 5, name: "Romance", icon: Heart, color: "#e91e63" },
   ];
 
+  const findBooksByMood = (moodQuery: string): Book[] => {
+    const query = moodQuery.toLowerCase();
+    const matchingBooks = allBooks.filter(book => 
+      book.moods.some(mood => mood.includes(query) || query.includes(mood))
+    );
+    
+    if (matchingBooks.length === 0) {
+      const shuffled = [...allBooks].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, 5);
+    }
+    
+    const shuffled = matchingBooks.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(5, shuffled.length));
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      const shuffled = [...allPopularBooks].sort(() => Math.random() - 0.5);
-      setPopularBooks(shuffled.slice(0, 5));
+      const books = findBooksByMood(searchQuery);
+      setRecommendedBooks(books);
       setShowRecommendations(true);
     }
   };
 
   const handleMoodClick = (mood: string) => {
-    const shuffled = [...allPopularBooks].sort(() => Math.random() - 0.5);
-    setPopularBooks(shuffled.slice(0, 5));
+    const books = findBooksByMood(mood);
+    setRecommendedBooks(books);
     setShowRecommendations(true);
+    setSearchQuery(mood);
   };
 
   return (
@@ -88,7 +123,7 @@ export const MacbookPro = (): JSX.Element => {
                 Recommended for you
               </h3>
               <div className="flex justify-center gap-[100px] flex-wrap">
-                {popularBooks.map((book) => (
+                {recommendedBooks.map((book) => (
                   <div key={book.id} className="flex flex-col items-center gap-3">
                     <Card className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
                       <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
