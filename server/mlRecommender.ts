@@ -76,7 +76,7 @@ export function getRecommendations(query: string, limit: number = 10): CMUBook[]
   const shuffled = scores
     .map(item => ({
       ...item,
-      finalScore: item.score * (0.5 + Math.random())
+      finalScore: item.score * (0.2 + Math.random() * 1.8)
     }))
     .sort((a, b) => b.finalScore - a.finalScore)
     .slice(0, limit);
