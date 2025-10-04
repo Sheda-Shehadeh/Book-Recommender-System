@@ -124,7 +124,7 @@ export const MacbookPro = (): JSX.Element => {
                         <img 
                           src={book.coverUrl} 
                           alt={book.title} 
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                       ) : (
                         <div className="w-full h-full bg-[#d9d9d9]" />
@@ -163,7 +163,7 @@ export const MacbookPro = (): JSX.Element => {
                         <img 
                           src={book.coverUrl} 
                           alt={book.title} 
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                       ) : (
                         <div className="w-full h-full bg-[#d9d9d9]" />
