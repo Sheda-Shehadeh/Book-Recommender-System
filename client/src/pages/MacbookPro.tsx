@@ -118,7 +118,7 @@ export const MacbookPro = (): JSX.Element => {
                   <div key={book.id} className="flex flex-col items-center gap-3">
                     <Card 
                       data-testid={`card-book-${book.id}`}
-                      className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                      className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                     >
                       {book.coverUrl ? (
                         <img 
@@ -156,7 +156,7 @@ export const MacbookPro = (): JSX.Element => {
                 <div key={book.id} className="flex flex-col items-center gap-3">
                   <Card 
                     data-testid={`card-popular-${book.id}`}
-                    className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                    className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                   >
                     {book.coverUrl ? (
                       <img 
@@ -196,7 +196,7 @@ export const MacbookPro = (): JSX.Element => {
                     <Card 
                       onClick={() => handleMoodClick(category.name)}
                       data-testid={`button-mood-${category.name.toLowerCase()}`}
-                      className="w-[159px] h-[134px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity flex flex-col items-center justify-center gap-2"
+                      className="w-[159px] h-[134px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity flex flex-col items-center justify-center gap-2"
                     >
                       <Icon className="w-10 h-10" style={{ color: category.color }} />
                       <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-lg">
