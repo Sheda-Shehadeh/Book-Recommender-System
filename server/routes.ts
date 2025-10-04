@@ -116,7 +116,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         book.coverImage = coverMap.get(key);
       });
 
-      const books: Book[] = recommendedBooks.map(book => convertCMUBookToBook(book));
+      // Filter out books without cover images
+      const booksWithCovers = recommendedBooks.filter(book => book.coverImage);
+      const books: Book[] = booksWithCovers.map(book => convertCMUBookToBook(book));
 
       return res.json({ books });
     } catch (error) {
@@ -155,7 +157,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         book.coverImage = coverMap.get(key);
       });
       
-      const books: Book[] = randomBooks.map(book => convertCMUBookToBook(book));
+      // Filter out books without cover images
+      const booksWithCovers = randomBooks.filter(book => book.coverImage);
+      const books: Book[] = booksWithCovers.map(book => convertCMUBookToBook(book));
 
       return res.json({ books });
     } catch (error) {
