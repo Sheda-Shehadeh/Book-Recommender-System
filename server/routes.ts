@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getBooksData, type CMUBook } from "./dataLoader";
 import { getRecommendations } from "./mlRecommender";
+import { fetchBookCovers } from "./googleBooksService";
 
 interface Book {
   id: string;
@@ -38,7 +39,7 @@ function convertCMUBookToBook(cmuBook: CMUBook): Book {
     authors: cmuBook.author ? [cmuBook.author] : ['Unknown Author'],
     description: cmuBook.summary.slice(0, 500),
     categories: Object.values(cmuBook.genres),
-    coverUrl: '',
+    coverUrl: cmuBook.coverImage || '',
     publishedDate: cmuBook.publicationDate,
   };
 }
@@ -104,6 +105,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ books: [] });
       }
 
+      // Fetch cover images from Google Books
+      const coverMap = await fetchBookCovers(
+        recommendedBooks.map(book => ({ title: book.title, author: book.author }))
+      );
+      
+      // Add cover images to books
+      recommendedBooks.forEach(book => {
+        const key = `${book.title}|||${book.author}`;
+        book.coverImage = coverMap.get(key);
+      });
+
       const books: Book[] = recommendedBooks.map(book => convertCMUBookToBook(book));
 
       return res.json({ books });
@@ -131,6 +143,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const randomBooks = filteredBooks
         .sort(() => Math.random() - 0.5)
         .slice(0, 10);
+      
+      // Fetch cover images from Google Books
+      const coverMap = await fetchBookCovers(
+        randomBooks.map(book => ({ title: book.title, author: book.author }))
+      );
+      
+      // Add cover images to books
+      randomBooks.forEach(book => {
+        const key = `${book.title}|||${book.author}`;
+        book.coverImage = coverMap.get(key);
+      });
       
       const books: Book[] = randomBooks.map(book => convertCMUBookToBook(book));
 

@@ -47,14 +47,28 @@ export async function fetchBookCover(title: string, author: string): Promise<str
     }
     
     // Prefer larger images, fall back to smaller ones
-    const coverUrl = imageLinks.large || 
-                     imageLinks.medium || 
-                     imageLinks.small ||
-                     imageLinks.thumbnail ||
-                     imageLinks.smallThumbnail;
+    let coverUrl = imageLinks.large || 
+                   imageLinks.medium || 
+                   imageLinks.small ||
+                   imageLinks.thumbnail ||
+                   imageLinks.smallThumbnail;
     
-    // Upgrade to HTTPS if needed
-    return coverUrl ? coverUrl.replace('http://', 'https://') : null;
+    if (!coverUrl) {
+      return null;
+    }
+    
+    // Upgrade to HTTPS
+    coverUrl = coverUrl.replace('http://', 'https://');
+    
+    // Remove curled corner effect by removing edge=curl parameter
+    coverUrl = coverUrl.replace(/&edge=curl/g, '');
+    
+    // Optionally force zoom=1 for flat covers (zoom=0 adds curl effect)
+    if (!coverUrl.includes('zoom=')) {
+      coverUrl += '&zoom=1';
+    }
+    
+    return coverUrl;
   } catch (error) {
     console.error(`Error fetching cover for "${title}":`, error);
     return null;
