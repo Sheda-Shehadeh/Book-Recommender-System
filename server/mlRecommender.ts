@@ -55,14 +55,10 @@ export function getRecommendations(query: string, limit: number = 10): CMUBook[]
     }
   });
   
-  scores.sort((a, b) => b.score - a.score);
-  
-  const topBooks = scores.slice(0, Math.min(scores.length, limit * 4));
-  
-  const shuffled = topBooks
+  const shuffled = scores
     .map(item => ({
       ...item,
-      finalScore: item.score * (0.7 + Math.random() * 0.6)
+      finalScore: item.score * (0.5 + Math.random())
     }))
     .sort((a, b) => b.finalScore - a.finalScore)
     .slice(0, limit);
