@@ -157,12 +157,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data.items = fallbackData.items;
       }
 
+      const academicCategories = [
+        'reference',
+        'language arts & disciplines',
+        'literary criticism',
+        'education',
+        'study aids',
+        'philosophy',
+        'criticism',
+        'encyclopedia'
+      ];
+      
       const booksWithDescriptions = data.items.filter((item: any) => 
         item.volumeInfo?.description && 
         item.volumeInfo?.description.length > 50
       );
       
-      const booksToScore = booksWithDescriptions.length >= 10 ? booksWithDescriptions : data.items;
+      const nonAcademicBooks = booksWithDescriptions.filter((item: any) => {
+        const categories = (item.volumeInfo?.categories || []).map((c: string) => c.toLowerCase());
+        const title = (item.volumeInfo?.title || '').toLowerCase();
+        
+        const isAcademic = categories.some((cat: string) => 
+          academicCategories.some(ac => cat.includes(ac))
+        ) || title.includes('encyclopedia') || title.includes('handbook') || title.includes('guide to');
+        
+        return !isAcademic;
+      });
+      
+      const booksToScore = nonAcademicBooks.length >= 10 ? nonAcademicBooks : booksWithDescriptions;
 
       const uniqueBooks = new Map();
       const scoredBooks = booksToScore
@@ -172,16 +194,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const randomFactor = Math.random() * 8;
           const totalScore = baseScore + ratingBonus + randomFactor;
           
-          if (totalScore > 5) {
-            console.log(`Book: "${item.volumeInfo?.title}" | Categories: ${JSON.stringify(item.volumeInfo?.categories)} | Score: ${totalScore.toFixed(1)}`);
-          }
-          
           return {
             item,
             score: totalScore
           };
         })
-        .filter((scored: any) => scored.score > 15)
+        .filter((scored: any) => scored.score > 12)
         .sort((a: any, b: any) => b.score - a.score)
         .filter((scored: any) => {
           if (uniqueBooks.has(scored.item.id)) {
