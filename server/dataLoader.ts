@@ -9,6 +9,7 @@ export interface CMUBook {
   publicationDate: string;
   genres: Record<string, string>;
   summary: string;
+  coverImage?: string;
 }
 
 let booksData: CMUBook[] = [];
