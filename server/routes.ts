@@ -170,13 +170,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const baseScore = calculateRelevanceScore(item, mood);
           const ratingBonus = (item.volumeInfo?.averageRating || 0) * 5;
           const randomFactor = Math.random() * 8;
+          const totalScore = baseScore + ratingBonus + randomFactor;
+          
+          if (totalScore > 5) {
+            console.log(`Book: "${item.volumeInfo?.title}" | Categories: ${JSON.stringify(item.volumeInfo?.categories)} | Score: ${totalScore.toFixed(1)}`);
+          }
           
           return {
             item,
-            score: baseScore + ratingBonus + randomFactor
+            score: totalScore
           };
         })
-        .filter((scored: any) => scored.score > 5)
+        .filter((scored: any) => scored.score > 15)
         .sort((a: any, b: any) => b.score - a.score)
         .filter((scored: any) => {
           if (uniqueBooks.has(scored.item.id)) {
