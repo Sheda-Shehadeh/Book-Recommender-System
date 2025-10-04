@@ -1,7 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { loadBooksData } from "./dataLoader";
+import { loadBooksData, getBooksData } from "./dataLoader";
+import { trainModel } from "./mlRecommender";
 
 const app = express();
 app.use(express.json());
@@ -41,6 +42,11 @@ app.use((req, res, next) => {
   log('Loading CMU books dataset...');
   await loadBooksData();
   log('Dataset loaded successfully');
+  
+  log('Training ML recommendation model...');
+  const books = getBooksData();
+  trainModel(books);
+  log('ML model trained successfully');
   
   const server = await registerRoutes(app);
 

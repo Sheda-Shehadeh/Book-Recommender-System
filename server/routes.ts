@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { getBooksData, type CMUBook } from "./dataLoader";
+import { getRecommendations } from "./mlRecommender";
 
 interface Book {
   id: string;
@@ -97,38 +98,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Mood parameter is required" });
       }
 
-      const allBooks = getBooksData();
+      const recommendedBooks = getRecommendations(mood, limit);
       
-      if (allBooks.length === 0) {
+      if (recommendedBooks.length === 0) {
         return res.json({ books: [] });
       }
 
-      const uniqueBooks = new Map<string, { book: CMUBook, score: number }>();
-      
-      allBooks.forEach((cmuBook) => {
-        const score = calculateRelevanceScore(cmuBook, mood);
-        
-        if (score > 0) {
-          const existing = uniqueBooks.get(cmuBook.title.toLowerCase());
-          if (!existing || score > existing.score) {
-            uniqueBooks.set(cmuBook.title.toLowerCase(), { book: cmuBook, score });
-          }
-        }
-      });
-
-      const scoredBooks = Array.from(uniqueBooks.values())
-        .map(item => ({
-          ...item,
-          randomBoost: Math.random() * 15
-        }))
-        .sort((a, b) => (b.score + b.randomBoost) - (a.score + a.randomBoost))
-        .slice(0, limit * 2);
-
-      const selectedBooks = scoredBooks
-        .sort(() => Math.random() - 0.5)
-        .slice(0, limit);
-
-      const books: Book[] = selectedBooks.map(({ book }) => convertCMUBookToBook(book));
+      const books: Book[] = recommendedBooks.map(book => convertCMUBookToBook(book));
 
       return res.json({ books });
     } catch (error) {
