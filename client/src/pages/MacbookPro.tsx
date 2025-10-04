@@ -104,8 +104,8 @@ export const MacbookPro = (): JSX.Element => {
   return (
     <div className="bg-[#f1e3c8] min-h-screen w-full overflow-x-hidden">
       <div className="max-w-[1764px] mx-auto px-8 py-12">
-        <header className="mb-20 flex justify-end">
-          <h1 className="[font-family:'Stoke',Helvetica] font-normal text-black text-5xl tracking-[0] leading-[60px]">
+        <header className="mb-20 flex justify-start">
+          <h1 className="[font-family:'Stoke',Helvetica] font-normal text-black text-3xl tracking-[0] leading-[40px]">
             NextChapter
           </h1>
         </header>
@@ -125,7 +125,7 @@ export const MacbookPro = (): JSX.Element => {
                 placeholder="What are you in the mood for?"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-[81px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-16 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black text-[25px] placeholder:text-black placeholder:opacity-100"
+                className="w-full h-[81px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-16 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black text-[32px] placeholder:text-black placeholder:opacity-100"
               />
             </form>
           </section>
