@@ -14,20 +14,38 @@ interface Book {
 }
 
 const moodToGenreMap: Record<string, string[]> = {
-  mystery: ['mystery', 'detective', 'crime', 'thriller'],
-  fantasy: ['fantasy', 'magic', 'epic fantasy', 'sword and sorcery'],
-  'sci-fi': ['science fiction', 'dystopian', 'space opera', 'cyberpunk'],
-  'science fiction': ['science fiction', 'dystopian', 'space opera', 'cyberpunk'],
-  horror: ['horror', 'supernatural', 'gothic', 'paranormal'],
-  romance: ['romance', 'love story', 'contemporary romance', 'romantic comedy'],
-  'young adult': ['young adult', 'teen', 'coming of age', 'ya fiction'],
-  thriller: ['thriller', 'suspense', 'psychological thriller', 'action'],
-  drama: ['drama', 'literary fiction', 'contemporary fiction'],
-  adventure: ['adventure', 'action adventure', 'quest'],
-  historical: ['historical fiction', 'historical', 'period drama'],
-  comedy: ['humor', 'comedy', 'satire', 'funny'],
-  inspirational: ['inspirational', 'motivational', 'uplifting', 'self-help'],
+  mystery: ['mystery', 'detective', 'crime'],
+  fantasy: ['fantasy', 'epic fantasy'],
+  'sci-fi': ['science fiction', 'dystopian'],
+  'science fiction': ['science fiction', 'dystopian'],
+  horror: ['horror', 'supernatural'],
+  romance: ['romance', 'love story'],
+  'young adult': ['young adult fiction', 'juvenile fiction'],
+  thriller: ['thriller', 'suspense'],
+  drama: ['drama', 'literary fiction'],
+  adventure: ['adventure', 'action'],
+  historical: ['historical fiction'],
+  comedy: ['humor', 'comedy'],
+  inspirational: ['inspirational', 'self-help'],
 };
+
+const fictionCategories = [
+  'fiction',
+  'romance',
+  'mystery',
+  'thriller',
+  'fantasy',
+  'science fiction',
+  'horror',
+  'adventure',
+  'young adult fiction',
+  'juvenile fiction',
+  'historical fiction',
+  'drama',
+  'humor',
+  'poetry',
+  'comics'
+];
 
 function calculateRelevanceScore(book: any, moodQuery: string): number {
   let score = 0;
@@ -36,44 +54,42 @@ function calculateRelevanceScore(book: any, moodQuery: string): number {
   
   const volumeInfo = book.volumeInfo || {};
   const categories = (volumeInfo.categories || []).map((c: string) => c.toLowerCase());
-  const description = (volumeInfo.description || '').toLowerCase();
-  const title = (volumeInfo.title || '').toLowerCase();
+  
+  if (categories.length === 0) {
+    return 0;
+  }
+  
+  const hasFictionCategory = categories.some((cat: string) => 
+    fictionCategories.some(fc => cat.includes(fc.toLowerCase()))
+  );
+  
+  if (!hasFictionCategory) {
+    return 0;
+  }
   
   let hasGenreMatch = false;
   
   queryWords.forEach((word: string) => {
     if (categories.some((cat: string) => cat.includes(word))) {
-      score += 15;
+      score += 20;
       hasGenreMatch = true;
     }
     
     const relatedGenres = moodToGenreMap[word] || [];
     relatedGenres.forEach(genre => {
       if (categories.some((cat: string) => cat.includes(genre.toLowerCase()))) {
-        score += 12;
+        score += 15;
         hasGenreMatch = true;
       }
-      
-      if (description.includes(genre.toLowerCase())) {
-        score += 4;
-      }
     });
-    
-    if (description.includes(word)) {
-      score += 3;
-    }
-    
-    if (title.includes(word)) {
-      score += 2;
-    }
   });
   
-  if (!hasGenreMatch && categories.length > 0) {
-    score = score * 0.3;
+  if (!hasGenreMatch) {
+    return 0;
   }
   
   if (volumeInfo.averageRating && volumeInfo.averageRating >= 3.5) {
-    score += (volumeInfo.averageRating - 3) * 3;
+    score += (volumeInfo.averageRating - 3) * 4;
   }
   
   return score;
@@ -157,34 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data.items = fallbackData.items;
       }
 
-      const academicCategories = [
-        'reference',
-        'language arts & disciplines',
-        'literary criticism',
-        'education',
-        'study aids',
-        'philosophy',
-        'criticism',
-        'encyclopedia'
-      ];
-      
-      const booksWithDescriptions = data.items.filter((item: any) => 
-        item.volumeInfo?.description && 
-        item.volumeInfo?.description.length > 50
-      );
-      
-      const nonAcademicBooks = booksWithDescriptions.filter((item: any) => {
-        const categories = (item.volumeInfo?.categories || []).map((c: string) => c.toLowerCase());
-        const title = (item.volumeInfo?.title || '').toLowerCase();
-        
-        const isAcademic = categories.some((cat: string) => 
-          academicCategories.some(ac => cat.includes(ac))
-        ) || title.includes('encyclopedia') || title.includes('handbook') || title.includes('guide to');
-        
-        return !isAcademic;
-      });
-      
-      const booksToScore = nonAcademicBooks.length >= 10 ? nonAcademicBooks : booksWithDescriptions;
+      const booksToScore = data.items.filter((item: any) => item.volumeInfo?.categories);
 
       const uniqueBooks = new Map();
       const scoredBooks = booksToScore
@@ -199,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             score: totalScore
           };
         })
-        .filter((scored: any) => scored.score > 12)
+        .filter((scored: any) => scored.score > 10)
         .sort((a: any, b: any) => b.score - a.score)
         .filter((scored: any) => {
           if (uniqueBooks.has(scored.item.id)) {
