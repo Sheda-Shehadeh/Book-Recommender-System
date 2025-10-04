@@ -110,9 +110,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const moodLower = mood.toLowerCase();
       const queryWords = moodLower.split(/\s+/);
       let searchQuery = '';
+      let isYoungAdult = false;
       
       if (moodLower.includes('young adult') || moodLower.includes('ya') || moodLower.includes('teen')) {
-        searchQuery = 'subject:"young adult fiction" OR subject:"juvenile fiction" OR subject:"teen fiction"';
+        searchQuery = 'subject:"young adult fiction"';
+        isYoungAdult = true;
       } else {
         const expandedQueries: string[] = [];
         queryWords.forEach(word => {
@@ -129,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchQuery = expandedQueries.join(' ');
       }
 
-      const startIndex = Math.floor(randomSeed % 10) * 10;
+      const startIndex = Math.floor((randomSeed % 50)) * 10;
       const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=40&printType=books&orderBy=relevance&startIndex=${startIndex}`;
       const response = await fetch(url);
       const data = await response.json();
@@ -138,44 +140,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ books: [] });
       }
 
-      let filteredBooks = data.items;
+      let booksToScore = data.items;
       
-      if (moodLower.includes('young adult') || moodLower.includes('ya') || moodLower.includes('teen')) {
-        filteredBooks = data.items.filter((item: any) => {
+      if (isYoungAdult) {
+        const yaBooks = data.items.filter((item: any) => {
           const categories = (item.volumeInfo?.categories || []).map((c: string) => c.toLowerCase());
+          const description = (item.volumeInfo?.description || '').toLowerCase();
           return categories.some((cat: string) => 
             cat.includes('young adult') || 
-            cat.includes('juvenile') || 
-            cat.includes('teen') ||
-            cat.includes('ya fiction')
-          );
+            cat.includes('juvenile fiction') || 
+            cat.includes('teen')
+          ) || description.includes('young adult') || description.includes('teen');
         });
+        
+        if (yaBooks.length >= 5) {
+          booksToScore = yaBooks;
+        }
       }
 
-      const scoredBooks = filteredBooks
+      const uniqueBooks = new Map();
+      const scoredBooks = booksToScore
         .map((item: any) => ({
           item,
-          score: calculateRelevanceScore(item, mood) + (Math.random() * 5)
+          score: calculateRelevanceScore(item, mood) + (Math.random() * 10)
         }))
         .sort((a: any, b: any) => b.score - a.score)
+        .filter((scored: any) => {
+          if (uniqueBooks.has(scored.item.id)) {
+            return false;
+          }
+          uniqueBooks.set(scored.item.id, true);
+          return true;
+        })
         .slice(0, limit);
 
-      const books: Book[] = scoredBooks.map(({ item }: any) => {
-        const vol = item.volumeInfo;
-        const imageLinks = vol.imageLinks || {};
-        const coverUrl = (imageLinks.large || imageLinks.medium || imageLinks.thumbnail || imageLinks.smallThumbnail || '').replace('http://', 'https://');
-        
-        return {
-          id: item.id,
-          title: vol.title || 'Unknown Title',
-          authors: vol.authors || ['Unknown Author'],
-          description: vol.description || 'No description available',
-          categories: vol.categories || [],
-          coverUrl,
-          publishedDate: vol.publishedDate || '',
-          averageRating: vol.averageRating
-        };
-      });
+      const books: Book[] = scoredBooks
+        .map(({ item }: any) => {
+          const vol = item.volumeInfo;
+          const imageLinks = vol.imageLinks || {};
+          const coverUrl = (imageLinks.large || imageLinks.medium || imageLinks.thumbnail || imageLinks.smallThumbnail || '').replace('http://', 'https://');
+          
+          return {
+            id: item.id,
+            title: vol.title || 'Unknown Title',
+            authors: vol.authors || ['Unknown Author'],
+            description: vol.description || 'No description available',
+            categories: vol.categories || [],
+            coverUrl,
+            publishedDate: vol.publishedDate || '',
+            averageRating: vol.averageRating
+          };
+        })
+        .filter((book: Book) => book.coverUrl);
 
       return res.json({ books });
     } catch (error) {
