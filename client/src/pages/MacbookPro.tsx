@@ -147,42 +147,44 @@ export const MacbookPro = (): JSX.Element => {
             </section>
           )}
 
-          <section className="w-full">
-            <h3 className="[font-family:'Stoke',Helvetica] font-normal text-black text-3xl text-center tracking-[0] leading-[40px] mb-12">
-              Popular books
-            </h3>
-            <div className="flex justify-center gap-[100px] flex-wrap">
-              {popularBooks.map((book) => (
-                <div key={book.id} className="flex flex-col items-center gap-3">
-                  <Card 
-                    data-testid={`card-popular-${book.id}`}
-                    className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
-                  >
-                    {book.coverUrl ? (
-                      <img 
-                        src={book.coverUrl} 
-                        alt={book.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-[#d9d9d9]" />
-                    )}
-                  </Card>
-                  <div className="text-center max-w-[149px]">
-                    <p 
-                      data-testid={`text-popular-title-${book.id}`}
-                      className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
+          {!showRecommendations && (
+            <section className="w-full">
+              <h3 className="[font-family:'Stoke',Helvetica] font-normal text-black text-3xl text-center tracking-[0] leading-[40px] mb-12">
+                Popular books
+              </h3>
+              <div className="flex justify-center gap-[100px] flex-wrap">
+                {popularBooks.map((book) => (
+                  <div key={book.id} className="flex flex-col items-center gap-3">
+                    <Card 
+                      data-testid={`card-popular-${book.id}`}
+                      className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                     >
-                      {book.title}
-                    </p>
-                    <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-xs opacity-70 mt-1">
-                      {book.authors.join(', ')}
-                    </p>
+                      {book.coverUrl ? (
+                        <img 
+                          src={book.coverUrl} 
+                          alt={book.title} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-[#d9d9d9]" />
+                      )}
+                    </Card>
+                    <div className="text-center max-w-[149px]">
+                      <p 
+                        data-testid={`text-popular-title-${book.id}`}
+                        className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
+                      >
+                        {book.title}
+                      </p>
+                      <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-xs opacity-70 mt-1">
+                        {book.authors.join(', ')}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section className="w-full">
             <h3 className="[font-family:'Stoke',Helvetica] font-normal text-black text-3xl text-center tracking-[0] leading-[40px] mb-12">
