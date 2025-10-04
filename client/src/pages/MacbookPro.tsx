@@ -46,7 +46,8 @@ export const MacbookPro = (): JSX.Element => {
   const fetchRecommendations = async (mood: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/books/recommend?mood=${encodeURIComponent(mood)}&limit=10`);
+      const randomSeed = Math.floor(Math.random() * 10000);
+      const response = await fetch(`/api/books/recommend?mood=${encodeURIComponent(mood)}&limit=10&seed=${randomSeed}`);
       const data = await response.json();
       setRecommendedBooks(data.books.slice(0, 5));
       setShowRecommendations(true);
@@ -93,6 +94,7 @@ export const MacbookPro = (): JSX.Element => {
                 placeholder="What are you in the mood for?"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                data-testid="input-search"
                 className="w-full h-[81px] bg-[#fdeed1] rounded-[10px] border border-solid border-black pl-16 pr-6 [font-family:'Playfair',Helvetica] font-normal text-black text-[32px] placeholder:text-[32px] placeholder:text-black placeholder:opacity-100"
               />
             </form>
@@ -114,7 +116,10 @@ export const MacbookPro = (): JSX.Element => {
               <div className="flex justify-center gap-[100px] flex-wrap">
                 {recommendedBooks.map((book) => (
                   <div key={book.id} className="flex flex-col items-center gap-3">
-                    <Card className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
+                    <Card 
+                      data-testid={`card-book-${book.id}`}
+                      className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                    >
                       {book.coverUrl ? (
                         <img 
                           src={book.coverUrl} 
@@ -126,7 +131,10 @@ export const MacbookPro = (): JSX.Element => {
                       )}
                     </Card>
                     <div className="text-center max-w-[149px]">
-                      <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight">
+                      <p 
+                        data-testid={`text-title-${book.id}`}
+                        className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
+                      >
                         {book.title}
                       </p>
                       <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-xs opacity-70 mt-1">
@@ -146,7 +154,10 @@ export const MacbookPro = (): JSX.Element => {
             <div className="flex justify-center gap-[100px] flex-wrap">
               {popularBooks.map((book) => (
                 <div key={book.id} className="flex flex-col items-center gap-3">
-                  <Card className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden">
+                  <Card 
+                    data-testid={`card-popular-${book.id}`}
+                    className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                  >
                     {book.coverUrl ? (
                       <img 
                         src={book.coverUrl} 
@@ -158,7 +169,10 @@ export const MacbookPro = (): JSX.Element => {
                     )}
                   </Card>
                   <div className="text-center max-w-[149px]">
-                    <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight">
+                    <p 
+                      data-testid={`text-popular-title-${book.id}`}
+                      className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
+                    >
                       {book.title}
                     </p>
                     <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-xs opacity-70 mt-1">
@@ -181,6 +195,7 @@ export const MacbookPro = (): JSX.Element => {
                   <div key={category.id} className="flex flex-col items-center gap-3">
                     <Card 
                       onClick={() => handleMoodClick(category.name)}
+                      data-testid={`button-mood-${category.name.toLowerCase()}`}
                       className="w-[159px] h-[134px] bg-[#d9d9d9] border-2 border-solid border-black rounded-none cursor-pointer hover:opacity-80 transition-opacity flex flex-col items-center justify-center gap-2"
                     >
                       <Icon className="w-10 h-10" style={{ color: category.color }} />

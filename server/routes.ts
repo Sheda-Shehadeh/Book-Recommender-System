@@ -101,36 +101,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const mood = (req.query.mood as string) || '';
       const limit = parseInt(req.query.limit as string) || 10;
+      const randomSeed = parseInt(req.query.seed as string) || Date.now();
       
       if (!mood) {
         return res.status(400).json({ error: "Mood parameter is required" });
       }
 
-      const queryWords = mood.toLowerCase().split(/\s+/);
-      const expandedQueries: string[] = [];
+      const moodLower = mood.toLowerCase();
+      const queryWords = moodLower.split(/\s+/);
+      let searchQuery = '';
       
-      queryWords.forEach(word => {
-        const relatedGenres = moodToGenreMap[word] || [];
-        if (relatedGenres.length > 0) {
-          expandedQueries.push(`subject:${relatedGenres[0]}`);
+      if (moodLower.includes('young adult') || moodLower.includes('ya') || moodLower.includes('teen')) {
+        searchQuery = 'subject:"young adult fiction" OR subject:"juvenile fiction" OR subject:"teen fiction"';
+      } else {
+        const expandedQueries: string[] = [];
+        queryWords.forEach(word => {
+          const relatedGenres = moodToGenreMap[word] || [];
+          if (relatedGenres.length > 0) {
+            const randomIndex = Math.floor((randomSeed + word.charCodeAt(0)) % relatedGenres.length);
+            expandedQueries.push(`subject:${relatedGenres[randomIndex]}`);
+          }
+        });
+        
+        if (expandedQueries.length === 0) {
+          expandedQueries.push(mood);
         }
-      });
-      
-      if (expandedQueries.length === 0) {
-        expandedQueries.push(mood);
+        searchQuery = expandedQueries.join(' ');
       }
 
-      const searchQuery = expandedQueries.join(' ');
-      const data = await searchGoogleBooks(searchQuery, 40);
+      const startIndex = Math.floor(randomSeed % 10) * 10;
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=40&printType=books&orderBy=relevance&startIndex=${startIndex}`;
+      const response = await fetch(url);
+      const data = await response.json();
       
       if (!data.items || data.items.length === 0) {
         return res.json({ books: [] });
       }
 
-      const scoredBooks = data.items
+      let filteredBooks = data.items;
+      
+      if (moodLower.includes('young adult') || moodLower.includes('ya') || moodLower.includes('teen')) {
+        filteredBooks = data.items.filter((item: any) => {
+          const categories = (item.volumeInfo?.categories || []).map((c: string) => c.toLowerCase());
+          return categories.some((cat: string) => 
+            cat.includes('young adult') || 
+            cat.includes('juvenile') || 
+            cat.includes('teen') ||
+            cat.includes('ya fiction')
+          );
+        });
+      }
+
+      const scoredBooks = filteredBooks
         .map((item: any) => ({
           item,
-          score: calculateRelevanceScore(item, mood)
+          score: calculateRelevanceScore(item, mood) + (Math.random() * 5)
         }))
         .sort((a: any, b: any) => b.score - a.score)
         .slice(0, limit);
