@@ -35,33 +35,45 @@ function calculateRelevanceScore(book: any, moodQuery: string): number {
   const queryWords = query.split(/\s+/);
   
   const volumeInfo = book.volumeInfo || {};
-  const categories = volumeInfo.categories || [];
+  const categories = (volumeInfo.categories || []).map((c: string) => c.toLowerCase());
   const description = (volumeInfo.description || '').toLowerCase();
   const title = (volumeInfo.title || '').toLowerCase();
   
+  let hasGenreMatch = false;
+  
   queryWords.forEach((word: string) => {
-    if (categories.some((cat: string) => cat.toLowerCase().includes(word))) {
-      score += 10;
-    }
-    
-    if (description.includes(word)) {
-      score += 5;
-    }
-    
-    if (title.includes(word)) {
-      score += 3;
+    if (categories.some((cat: string) => cat.includes(word))) {
+      score += 15;
+      hasGenreMatch = true;
     }
     
     const relatedGenres = moodToGenreMap[word] || [];
     relatedGenres.forEach(genre => {
-      if (categories.some((cat: string) => cat.toLowerCase().includes(genre))) {
-        score += 7;
+      if (categories.some((cat: string) => cat.includes(genre.toLowerCase()))) {
+        score += 12;
+        hasGenreMatch = true;
+      }
+      
+      if (description.includes(genre.toLowerCase())) {
+        score += 4;
       }
     });
+    
+    if (description.includes(word)) {
+      score += 3;
+    }
+    
+    if (title.includes(word)) {
+      score += 2;
+    }
   });
   
-  if (volumeInfo.averageRating) {
-    score += volumeInfo.averageRating * 2;
+  if (!hasGenreMatch && categories.length > 0) {
+    score = score * 0.3;
+  }
+  
+  if (volumeInfo.averageRating && volumeInfo.averageRating >= 3.5) {
+    score += (volumeInfo.averageRating - 3) * 3;
   }
   
   return score;
@@ -164,6 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             score: baseScore + ratingBonus + randomFactor
           };
         })
+        .filter((scored: any) => scored.score > 5)
         .sort((a: any, b: any) => b.score - a.score)
         .filter((scored: any) => {
           if (uniqueBooks.has(scored.item.id)) {
