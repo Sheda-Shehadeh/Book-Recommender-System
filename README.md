@@ -15,7 +15,7 @@
 You can also add a section like this later:
 - User login & saving favorite books/creating TBR  
 - Personalized recommendations via user profiles
-
+___
 ### Setup
 1. `git clone https://github.com/Sheda-Shehadeh/Book-Recommender-System.git`
 2. `cd Book-Recommender-System`
