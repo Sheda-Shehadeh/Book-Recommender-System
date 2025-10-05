@@ -73,7 +73,7 @@ export const MacbookPro = (): JSX.Element => {
   return (
     <div className="bg-[#f1e3c8] min-h-screen w-full overflow-x-hidden">
       <div className="max-w-[1764px] mx-auto px-8 py-6">
-        <header className="mb-8 flex justify-start">
+        <header className="mb-1 flex justify-start">
           <h1 className="[font-family:'Stoke',Helvetica] font-normal text-black text-3xl tracking-[0] leading-[40px]">
             NextChapter
           </h1>
@@ -81,7 +81,7 @@ export const MacbookPro = (): JSX.Element => {
 
         <main className="flex flex-col items-center gap-12">
           <section className="flex flex-col items-center gap-6 w-full max-w-4xl">
-            <h2 className="[font-family:'Playfair_Display',Helvetica] font-normal text-black text-6xl text-center tracking-[0] leading-[normal]">
+            <h2 className="[font-family:'Playfair_Display',Helvetica] font-normal text-black text-[3.5rem] text-center tracking-[0] leading-[normal]">
               Find your next favorite read
             </h2>
 
