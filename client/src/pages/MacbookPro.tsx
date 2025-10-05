@@ -79,7 +79,17 @@ export const MacbookPro = (): JSX.Element => {
   const BookCard = ({ book, testIdPrefix }: { book: Book; testIdPrefix: string }) => {
     const truncateText = (text: string, maxLength: number) => {
       if (text.length <= maxLength) return text;
-      return text.substring(0, maxLength) + '...';
+      
+      // Find the last complete word that fits within maxLength
+      let truncated = text.substring(0, maxLength);
+      const lastSpaceIndex = truncated.lastIndexOf(' ');
+      
+      // If there's a space, cut at the last complete word
+      if (lastSpaceIndex > 0) {
+        truncated = truncated.substring(0, lastSpaceIndex);
+      }
+      
+      return truncated + '...';
     };
 
     return (
