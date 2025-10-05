@@ -12,7 +12,6 @@
 - Adding clickable book pages with detailed information.
 ---
 ### 💡 Future Ideas
-You can also add a section like this later:
 - User login & saving favorite books/creating TBR  
 - Personalized recommendations via user profiles
 ___
