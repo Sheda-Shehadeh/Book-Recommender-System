@@ -151,21 +151,17 @@ export const MacbookPro = (): JSX.Element => {
               <div className="flex justify-center gap-[100px] flex-wrap">
                 {popularBooks.map((book) => (
                   <div key={book.id} className="flex flex-col items-center gap-3">
-                    <Card 
+                    <div 
                       data-testid={`card-popular-${book.id}`}
-                      className="w-[149px] h-[205px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                      className="w-[135px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                     >
-                      {book.coverUrl ? (
-                        <img 
-                          src={book.coverUrl} 
-                          alt={book.title} 
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[#d9d9d9]" />
-                      )}
-                    </Card>
-                    <div className="text-center max-w-[149px]">
+                      <img 
+                        src={book.coverUrl} 
+                        alt={book.title} 
+                        className="w-full h-full object-cover block"
+                      />
+                    </div>
+                    <div className="text-center max-w-[135px]">
                       <p 
                         data-testid={`text-popular-title-${book.id}`}
                         className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
