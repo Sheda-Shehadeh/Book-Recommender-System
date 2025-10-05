@@ -2,6 +2,11 @@ import { SearchIcon, Sparkles, Rocket, Skull, Heart } from "lucide-react";
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface Book {
   id: string;
@@ -12,6 +17,7 @@ interface Book {
   coverUrl: string;
   publishedDate: string;
   averageRating?: number;
+  summary?: string;
 }
 
 export const MacbookPro = (): JSX.Element => {
@@ -70,6 +76,88 @@ export const MacbookPro = (): JSX.Element => {
     fetchRecommendations(mood);
   };
 
+  const BookCard = ({ book, testIdPrefix }: { book: Book; testIdPrefix: string }) => {
+    const truncateText = (text: string, maxLength: number) => {
+      if (text.length <= maxLength) return text;
+      return text.substring(0, maxLength) + '...';
+    };
+
+    return (
+      <HoverCard openDelay={200}>
+        <HoverCardTrigger asChild>
+          <div className="flex flex-col items-center gap-3">
+            <div 
+              data-testid={`${testIdPrefix}-${book.id}`}
+              className="w-[135px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+            >
+              <img 
+                src={book.coverUrl} 
+                alt={book.title} 
+                className="w-full h-full object-cover block"
+              />
+            </div>
+            <div className="text-center max-w-[135px]">
+              <p 
+                data-testid={`text-title-${book.id}`}
+                className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
+              >
+                {book.title}
+              </p>
+              <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-xs opacity-70 mt-1">
+                {book.authors.join(', ')}
+              </p>
+            </div>
+          </div>
+        </HoverCardTrigger>
+        <HoverCardContent 
+          side="top" 
+          align="center"
+          className="w-[320px] bg-[#fdeed1] border-2 border-solid border-black rounded-[10px] p-4"
+          data-testid={`hover-details-${book.id}`}
+        >
+          <div className="space-y-3">
+            <div>
+              <h4 className="[font-family:'Stoke',Helvetica] font-bold text-black text-base leading-tight">
+                {book.title}
+              </h4>
+              <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm opacity-70 mt-1">
+                by {book.authors.join(', ')}
+              </p>
+            </div>
+            
+            {book.categories && book.categories.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {book.categories.slice(0, 3).map((category, idx) => (
+                  <span 
+                    key={idx}
+                    className="px-2 py-1 bg-[#8b7355] text-white text-xs rounded-md [font-family:'Stoke',Helvetica]"
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+            )}
+            
+            {(book.description || book.summary) && (
+              <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-relaxed">
+                {truncateText(book.description || book.summary || '', 200)}
+              </p>
+            )}
+            
+            <div className="flex items-center justify-between text-xs [font-family:'Stoke',Helvetica] opacity-70">
+              {book.publishedDate && (
+                <span>Published: {new Date(book.publishedDate).getFullYear()}</span>
+              )}
+              {book.averageRating && (
+                <span>★ {book.averageRating.toFixed(1)}</span>
+              )}
+            </div>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  };
+
   return (
     <div className="bg-[#f1e3c8] min-h-screen w-full overflow-x-hidden">
       <div className="max-w-[1764px] mx-auto px-8 py-6">
@@ -115,29 +203,7 @@ export const MacbookPro = (): JSX.Element => {
               </h3>
               <div className="flex justify-center gap-[100px] flex-wrap">
                 {recommendedBooks.map((book) => (
-                  <div key={book.id} className="flex flex-col items-center gap-3">
-                    <div 
-                      data-testid={`card-book-${book.id}`}
-                      className="w-[135px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
-                    >
-                      <img 
-                        src={book.coverUrl} 
-                        alt={book.title} 
-                        className="w-full h-full object-cover block"
-                      />
-                    </div>
-                    <div className="text-center max-w-[135px]">
-                      <p 
-                        data-testid={`text-title-${book.id}`}
-                        className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
-                      >
-                        {book.title}
-                      </p>
-                      <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-xs opacity-70 mt-1">
-                        {book.authors.join(', ')}
-                      </p>
-                    </div>
-                  </div>
+                  <BookCard key={book.id} book={book} testIdPrefix="card-book" />
                 ))}
               </div>
             </section>
@@ -150,29 +216,7 @@ export const MacbookPro = (): JSX.Element => {
               </h3>
               <div className="flex justify-center gap-[100px] flex-wrap">
                 {popularBooks.map((book) => (
-                  <div key={book.id} className="flex flex-col items-center gap-3">
-                    <div 
-                      data-testid={`card-popular-${book.id}`}
-                      className="w-[135px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
-                    >
-                      <img 
-                        src={book.coverUrl} 
-                        alt={book.title} 
-                        className="w-full h-full object-cover block"
-                      />
-                    </div>
-                    <div className="text-center max-w-[135px]">
-                      <p 
-                        data-testid={`text-popular-title-${book.id}`}
-                        className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
-                      >
-                        {book.title}
-                      </p>
-                      <p className="[font-family:'Stoke',Helvetica] font-normal text-black text-xs opacity-70 mt-1">
-                        {book.authors.join(', ')}
-                      </p>
-                    </div>
-                  </div>
+                  <BookCard key={book.id} book={book} testIdPrefix="card-popular" />
                 ))}
               </div>
             </section>
