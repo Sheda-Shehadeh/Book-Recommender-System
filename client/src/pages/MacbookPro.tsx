@@ -118,7 +118,7 @@ export const MacbookPro = (): JSX.Element => {
                   <div key={book.id} className="flex flex-col items-center gap-3">
                     <div 
                       data-testid={`card-book-${book.id}`}
-                      className="w-[149px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                      className="w-[135px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                     >
                       <img 
                         src={book.coverUrl} 
@@ -126,7 +126,7 @@ export const MacbookPro = (): JSX.Element => {
                         className="w-full h-full object-cover block"
                       />
                     </div>
-                    <div className="text-center max-w-[149px]">
+                    <div className="text-center max-w-[135px]">
                       <p 
                         data-testid={`text-title-${book.id}`}
                         className="[font-family:'Stoke',Helvetica] font-normal text-black text-sm leading-tight"
