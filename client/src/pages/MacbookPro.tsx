@@ -79,8 +79,8 @@ export const MacbookPro = (): JSX.Element => {
           </h1>
         </header>
 
-        <main className="flex flex-col items-center gap-16">
-          <section className="flex flex-col items-center gap-8 w-full max-w-4xl">
+        <main className="flex flex-col items-center gap-12">
+          <section className="flex flex-col items-center gap-6 w-full max-w-4xl">
             <h2 className="[font-family:'Playfair_Display',Helvetica] font-normal text-black text-6xl text-center tracking-[0] leading-[normal]">
               Find your next favorite read
             </h2>
