@@ -72,8 +72,8 @@ export const MacbookPro = (): JSX.Element => {
 
   return (
     <div className="bg-[#f1e3c8] min-h-screen w-full overflow-x-hidden">
-      <div className="max-w-[1764px] mx-auto px-8 py-12">
-        <header className="mb-12 flex justify-start">
+      <div className="max-w-[1764px] mx-auto px-8 py-6">
+        <header className="mb-8 flex justify-start">
           <h1 className="[font-family:'Stoke',Helvetica] font-normal text-black text-3xl tracking-[0] leading-[40px]">
             NextChapter
           </h1>
