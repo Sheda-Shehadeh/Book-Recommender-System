@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { getBooksData, type CMUBook } from "./dataLoader";
 import { getRecommendations } from "./mlRecommender";
 import { fetchBookCovers } from "./googleBooksService";
+import { ensureInitialized } from "./lazyInit";
 
 interface Book {
   id: string;
@@ -92,6 +93,8 @@ function calculateRelevanceScore(cmuBook: CMUBook, moodQuery: string): number {
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/books/recommend", async (req, res) => {
     try {
+      await ensureInitialized();
+      
       const mood = (req.query.mood as string) || '';
       const limit = parseInt(req.query.limit as string) || 10;
       
@@ -129,6 +132,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/books/popular", async (req, res) => {
     try {
+      await ensureInitialized();
+      
       const allBooks = getBooksData();
       
       if (allBooks.length === 0) {
