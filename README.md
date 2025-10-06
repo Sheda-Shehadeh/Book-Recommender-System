@@ -15,12 +15,7 @@
 - User login & saving favorite books/creating TBR  
 - Personalized recommendations via user profiles
 ___
-### ⚙️ Setup
-1. `git clone https://github.com/Sheda-Shehadeh/Book-Recommender-System.git`
-2. `cd Book-Recommender-System`
-3. `npm install`
-4. Create `.env` with `PORT=5001`
-5. `PORT=5001 npm run dev`
-6. Open `http://localhost:5001`
+### ⚙️ Try it yourself!
+Visit this [link](https://book-recomendation-system-shedashehadeh.replit.app)
 
 
