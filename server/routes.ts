@@ -5,6 +5,7 @@ import { getBooksData, type CMUBook } from "./dataLoader";
 import { getRecommendations } from "./mlRecommender";
 import { fetchBookCovers } from "./googleBooksService";
 import { ensureInitialized } from "./lazyInit";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 interface Book {
   id: string;
@@ -91,6 +92,114 @@ function calculateRelevanceScore(cmuBook: CMUBook, moodQuery: string): number {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  await setupAuth(app);
+
+  app.get('/api/auth/user', (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const user = req.user as any;
+    res.json({
+      id: user.claims?.sub,
+      email: user.claims?.email,
+      firstName: user.claims?.first_name,
+      lastName: user.claims?.last_name,
+      profileImageUrl: user.claims?.profile_image_url,
+    });
+  });
+
+  app.get("/api/user/books", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const status = req.query.status as string | undefined;
+      
+      let books;
+      if (status) {
+        books = await storage.getUserBooksByStatus(userId, status);
+      } else {
+        books = await storage.getUserBooks(userId);
+      }
+      res.json({ books });
+    } catch (error) {
+      console.error("Error fetching user books:", error);
+      res.status(500).json({ error: "Failed to fetch user books" });
+    }
+  });
+
+  app.post("/api/user/books", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { bookId, title, authors, coverUrl, description, status } = req.body;
+      
+      if (!bookId || !title || !status) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      if (!['want_to_read', 'have_read'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status. Must be 'want_to_read' or 'have_read'" });
+      }
+      
+      const book = await storage.addUserBook({
+        userId,
+        bookId,
+        title,
+        authors: Array.isArray(authors) ? authors.join(', ') : authors,
+        coverUrl,
+        description,
+        status,
+      });
+      
+      res.json({ book });
+    } catch (error) {
+      console.error("Error saving book:", error);
+      res.status(500).json({ error: "Failed to save book" });
+    }
+  });
+
+  app.delete("/api/user/books/:bookId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { bookId } = req.params;
+      
+      await storage.removeUserBook(userId, bookId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing book:", error);
+      res.status(500).json({ error: "Failed to remove book" });
+    }
+  });
+
+  app.patch("/api/user/books/:bookId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { bookId } = req.params;
+      const { status } = req.body;
+      
+      if (!['want_to_read', 'have_read'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      
+      const book = await storage.updateUserBookStatus(userId, bookId, status);
+      res.json({ book });
+    } catch (error) {
+      console.error("Error updating book:", error);
+      res.status(500).json({ error: "Failed to update book" });
+    }
+  });
+
+  app.get("/api/user/books/:bookId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { bookId } = req.params;
+      
+      const book = await storage.getUserBook(userId, bookId);
+      res.json({ book: book || null });
+    } catch (error) {
+      console.error("Error fetching book:", error);
+      res.status(500).json({ error: "Failed to fetch book" });
+    }
+  });
+
   app.get("/api/books/recommend", async (req, res) => {
     try {
       await ensureInitialized();
@@ -108,18 +217,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ books: [] });
       }
 
-      // Fetch cover images from Google Books
       const coverMap = await fetchBookCovers(
         recommendedBooks.map(book => ({ title: book.title, author: book.author }))
       );
       
-      // Add cover images to books
       recommendedBooks.forEach(book => {
         const key = `${book.title}|||${book.author}`;
         book.coverImage = coverMap.get(key);
       });
 
-      // Filter out books without cover images
       const booksWithCovers = recommendedBooks.filter(book => book.coverImage);
       const books: Book[] = booksWithCovers.map(book => convertCMUBookToBook(book));
 
@@ -151,18 +257,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .sort(() => Math.random() - 0.5)
         .slice(0, 10);
       
-      // Fetch cover images from Google Books
       const coverMap = await fetchBookCovers(
         randomBooks.map(book => ({ title: book.title, author: book.author }))
       );
       
-      // Add cover images to books
       randomBooks.forEach(book => {
         const key = `${book.title}|||${book.author}`;
         book.coverImage = coverMap.get(key);
       });
       
-      // Filter out books without cover images
       const booksWithCovers = randomBooks.filter(book => book.coverImage);
       const books: Book[] = booksWithCovers.map(book => convertCMUBookToBook(book));
 

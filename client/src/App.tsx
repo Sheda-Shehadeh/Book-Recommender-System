@@ -6,13 +6,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
 import { MacbookPro } from "@/pages/MacbookPro";
+import { MyBooks } from "@/pages/MyBooks";
 
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
       <Route path="/" component={MacbookPro} />
-      {/* Fallback to 404 */}
+      <Route path="/my-books" component={MyBooks} />
       <Route component={NotFound} />
     </Switch>
   );

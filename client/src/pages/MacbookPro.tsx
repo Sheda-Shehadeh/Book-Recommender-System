@@ -1,12 +1,22 @@
-import { SearchIcon, Sparkles, Rocket, Skull, Heart } from "lucide-react";
+import { SearchIcon, Sparkles, Rocket, Skull, Heart, BookMarked, BookOpen, User, LogOut } from "lucide-react";
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 interface Book {
   id: string;
@@ -21,11 +31,14 @@ interface Book {
 }
 
 export const MacbookPro = (): JSX.Element => {
+  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [popularBooks, setPopularBooks] = React.useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [recommendedBooks, setRecommendedBooks] = React.useState<Book[]>([]);
   const [showRecommendations, setShowRecommendations] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [savedBooks, setSavedBooks] = React.useState<Set<string>>(new Set());
 
   const moodCategories = [
     { id: 1, name: "Mystery", icon: SearchIcon, color: "#8b7355" },
@@ -39,6 +52,12 @@ export const MacbookPro = (): JSX.Element => {
     fetchPopularBooks();
   }, []);
 
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      fetchSavedBooks();
+    }
+  }, [isAuthenticated]);
+
   const fetchPopularBooks = async () => {
     try {
       const response = await fetch('/api/books/popular');
@@ -46,6 +65,18 @@ export const MacbookPro = (): JSX.Element => {
       setPopularBooks(data.books.slice(0, 5));
     } catch (error) {
       console.error("Error fetching popular books:", error);
+    }
+  };
+
+  const fetchSavedBooks = async () => {
+    try {
+      const response = await fetch('/api/user/books');
+      if (response.ok) {
+        const data = await response.json();
+        setSavedBooks(new Set(data.books.map((b: any) => b.bookId)));
+      }
+    } catch (error) {
+      console.error("Error fetching saved books:", error);
     }
   };
 
@@ -76,21 +107,59 @@ export const MacbookPro = (): JSX.Element => {
     fetchRecommendations(mood);
   };
 
+  const saveBook = async (book: Book, status: 'want_to_read' | 'have_read') => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save books.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/user/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookId: book.id,
+          title: book.title,
+          authors: book.authors.join(', '),
+          coverUrl: book.coverUrl,
+          description: book.description || book.summary,
+          status,
+        }),
+      });
+
+      if (response.ok) {
+        setSavedBooks(prev => new Set([...Array.from(prev), book.id]));
+        toast({
+          title: "Book saved!",
+          description: `Added to ${status === 'want_to_read' ? 'Want to Read' : 'Have Read'}.`,
+        });
+      }
+    } catch (error) {
+      console.error("Error saving book:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save book.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const BookCard = ({ book, testIdPrefix }: { book: Book; testIdPrefix: string }) => {
     const truncateText = (text: string, maxLength: number) => {
       if (text.length <= maxLength) return text;
-      
-      // Find the last complete word that fits within maxLength
       let truncated = text.substring(0, maxLength);
       const lastSpaceIndex = truncated.lastIndexOf(' ');
-      
-      // If there's a space, cut at the last complete word
       if (lastSpaceIndex > 0) {
         truncated = truncated.substring(0, lastSpaceIndex);
       }
-      
       return truncated + '...';
     };
+
+    const isSaved = savedBooks.has(book.id);
 
     return (
       <HoverCard openDelay={200}>
@@ -98,13 +167,18 @@ export const MacbookPro = (): JSX.Element => {
           <div className="flex flex-col items-center gap-3">
             <div 
               data-testid={`${testIdPrefix}-${book.id}`}
-              className="w-[135px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+              className="w-[135px] h-[224px] bg-[#d9d9d9] border-2 border-solid border-black rounded-[10px] cursor-pointer hover:opacity-80 transition-opacity overflow-hidden relative"
             >
               <img 
                 src={book.coverUrl} 
                 alt={book.title} 
                 className="w-full h-full object-cover block"
               />
+              {isSaved && (
+                <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
+                  <BookMarked className="w-3 h-3" />
+                </div>
+              )}
             </div>
             <div className="text-center max-w-[135px]">
               <p 
@@ -162,6 +236,37 @@ export const MacbookPro = (): JSX.Element => {
                 <span>★ {book.averageRating.toFixed(1)}</span>
               )}
             </div>
+
+            {isAuthenticated && (
+              <div className="flex gap-2 pt-2 border-t border-black/20">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    saveBook(book, 'want_to_read');
+                  }}
+                  className="flex-1 [font-family:'Stoke',Helvetica] text-xs"
+                  disabled={isSaved}
+                >
+                  <BookMarked className="w-3 h-3 mr-1" />
+                  Want to Read
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    saveBook(book, 'have_read');
+                  }}
+                  className="flex-1 [font-family:'Stoke',Helvetica] text-xs"
+                  disabled={isSaved}
+                >
+                  <BookOpen className="w-3 h-3 mr-1" />
+                  Have Read
+                </Button>
+              </div>
+            )}
           </div>
         </HoverCardContent>
       </HoverCard>
@@ -171,10 +276,59 @@ export const MacbookPro = (): JSX.Element => {
   return (
     <div className="bg-[#f1e3c8] min-h-screen w-full overflow-x-hidden">
       <div className="max-w-[1764px] mx-auto px-8 py-6">
-        <header className="mb-1 flex justify-start">
+        <header className="mb-1 flex justify-between items-center">
           <h1 className="[font-family:'Stoke',Helvetica] font-normal text-black text-3xl tracking-[0] leading-[40px]">
             NextChapter
           </h1>
+          
+          <div className="flex items-center gap-4">
+            {authLoading ? (
+              <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse" />
+            ) : isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 [font-family:'Stoke',Helvetica]">
+                    {(user as any).profileImageUrl ? (
+                      <img 
+                        src={(user as any).profileImageUrl} 
+                        alt="Profile" 
+                        className="w-8 h-8 rounded-full object-cover border-2 border-black"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-[#8b7355] flex items-center justify-center">
+                        <User className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                    <span className="hidden sm:inline">
+                      {(user as any).firstName || (user as any).email?.split('@')[0] || 'User'}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-[#fdeed1] border-2 border-black">
+                  <DropdownMenuItem asChild>
+                    <Link href="/my-books" className="flex items-center gap-2 [font-family:'Stoke',Helvetica] cursor-pointer">
+                      <BookMarked className="w-4 h-4" />
+                      My Books
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => window.location.href = '/api/logout'}
+                    className="flex items-center gap-2 [font-family:'Stoke',Helvetica] cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                onClick={() => window.location.href = '/api/login'}
+                className="bg-[#8b7355] hover:bg-[#6d5a44] text-white [font-family:'Stoke',Helvetica]"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
         </header>
 
         <main className="flex flex-col items-center gap-12">
