@@ -5,7 +5,7 @@ import { getBooksData, type CMUBook } from "./dataLoader";
 import { getRecommendations } from "./mlRecommender";
 import { fetchBookCovers } from "./googleBooksService";
 import { ensureInitialized } from "./lazyInit";
-import { setupAuth, isAuthenticated, hashPassword, comparePassword } from "./auth";
+import { setupAuth, isAuthenticated, hashPassword, comparePassword, regenerateSession } from "./auth";
 
 interface Book {
   id: string;
@@ -76,6 +76,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       req.session.userId = user.id;
       
+      try {
+        await regenerateSession(req);
+      } catch (regenerateErr) {
+        console.error("Session regeneration error:", regenerateErr);
+      }
+      
       res.json({
         id: user.id,
         email: user.email,
@@ -107,6 +113,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       req.session.userId = user.id;
+      
+      try {
+        await regenerateSession(req);
+      } catch (regenerateErr) {
+        console.error("Session regeneration error:", regenerateErr);
+      }
       
       res.json({
         id: user.id,
