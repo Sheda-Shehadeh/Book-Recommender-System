@@ -7,12 +7,16 @@ import NotFound from "@/pages/not-found";
 
 import { MacbookPro } from "@/pages/MacbookPro";
 import { MyBooks } from "@/pages/MyBooks";
+import { Login } from "@/pages/Login";
+import { Signup } from "@/pages/Signup";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={MacbookPro} />
       <Route path="/my-books" component={MyBooks} />
+      <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
       <Route component={NotFound} />
     </Switch>
   );

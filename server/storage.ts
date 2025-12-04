@@ -1,10 +1,11 @@
-import { users, userBooks, type User, type UpsertUser, type UserBook, type InsertUserBook } from "@shared/schema";
+import { users, userBooks, type User, type InsertUser, type UserBook, type InsertUserBook } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
   getUserBooks(userId: string): Promise<UserBook[]>;
   getUserBooksByStatus(userId: string, status: string): Promise<UserBook[]>;
   addUserBook(book: InsertUserBook): Promise<UserBook>;
@@ -19,18 +20,13 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(userData: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(userData).returning();
     return user;
   }
 

@@ -288,17 +288,9 @@ export const MacbookPro = (): JSX.Element => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 [font-family:'Stoke',Helvetica]">
-                    {(user as any).profileImageUrl ? (
-                      <img 
-                        src={(user as any).profileImageUrl} 
-                        alt="Profile" 
-                        className="w-8 h-8 rounded-full object-cover border-2 border-black"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-[#8b7355] flex items-center justify-center">
-                        <User className="w-4 h-4 text-white" />
-                      </div>
-                    )}
+                    <div className="w-8 h-8 rounded-full bg-[#8b7355] flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
                     <span className="hidden sm:inline">
                       {(user as any).firstName || (user as any).email?.split('@')[0] || 'User'}
                     </span>
@@ -312,7 +304,10 @@ export const MacbookPro = (): JSX.Element => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem 
-                    onClick={() => window.location.href = '/api/logout'}
+                    onClick={async () => {
+                      await fetch('/api/auth/logout', { method: 'POST' });
+                      window.location.href = '/';
+                    }}
                     className="flex items-center gap-2 [font-family:'Stoke',Helvetica] cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
@@ -321,12 +316,11 @@ export const MacbookPro = (): JSX.Element => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button 
-                onClick={() => window.location.href = '/api/login'}
-                className="bg-[#8b7355] hover:bg-[#6d5a44] text-white [font-family:'Stoke',Helvetica]"
-              >
-                Sign In
-              </Button>
+              <Link href="/login">
+                <Button className="bg-[#8b7355] hover:bg-[#6d5a44] text-white [font-family:'Stoke',Helvetica]">
+                  Sign In
+                </Button>
+              </Link>
             )}
           </div>
         </header>

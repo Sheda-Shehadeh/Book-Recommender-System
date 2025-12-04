@@ -5,7 +5,7 @@ import { getBooksData, type CMUBook } from "./dataLoader";
 import { getRecommendations } from "./mlRecommender";
 import { fetchBookCovers } from "./googleBooksService";
 import { ensureInitialized } from "./lazyInit";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, hashPassword, comparePassword } from "./auth";
 
 interface Book {
   id: string;
@@ -46,71 +46,111 @@ function convertCMUBookToBook(cmuBook: CMUBook): Book {
   };
 }
 
-function calculateRelevanceScore(cmuBook: CMUBook, moodQuery: string): number {
-  let score = 0;
-  const query = moodQuery.toLowerCase();
-  const queryWords = query.split(/\s+/);
-  
-  const title = cmuBook.title.toLowerCase();
-  const summary = cmuBook.summary.toLowerCase();
-  const genreValues = Object.values(cmuBook.genres).map(g => g.toLowerCase());
-  
-  if (genreValues.length === 0) {
-    return 0;
-  }
-  
-  queryWords.forEach((word: string) => {
-    genreValues.forEach(genre => {
-      if (genre.includes(word)) {
-        score += 25;
-      }
-    });
-    
-    const relatedGenres = moodToGenreMap[word] || [];
-    relatedGenres.forEach(relatedGenre => {
-      genreValues.forEach(genre => {
-        if (genre.includes(relatedGenre.toLowerCase())) {
-          score += 20;
-        }
-      });
+export async function registerRoutes(app: Express): Promise<Server> {
+  setupAuth(app);
+
+  app.post('/api/auth/signup', async (req, res) => {
+    try {
+      const { email, password, firstName, lastName } = req.body;
       
-      if (summary.includes(relatedGenre.toLowerCase())) {
-        score += 8;
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
       }
-    });
-    
-    if (title.includes(word) && word.length > 3) {
-      score += 5;
-    }
-    
-    if (summary.includes(word) && word.length > 3) {
-      score += 3;
+
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "An account with this email already exists" });
+      }
+
+      const hashedPassword = await hashPassword(password);
+      const user = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName: firstName || null,
+        lastName: lastName || null,
+      });
+
+      req.session.userId = user.id;
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({ message: "Failed to create account" });
     }
   });
-  
-  return score;
-}
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  await setupAuth(app);
-
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.post('/api/auth/login', async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const isValid = await comparePassword(password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      req.session.userId = user.id;
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Failed to log in" });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Failed to log out" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  app.get('/api/auth/user', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json(user);
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  app.get("/api/user/books", isAuthenticated, async (req: any, res) => {
+  app.get("/api/user/books", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId!;
       const status = req.query.status as string | undefined;
       
       let books;
@@ -126,9 +166,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/user/books", isAuthenticated, async (req: any, res) => {
+  app.post("/api/user/books", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId!;
       const { bookId, title, authors, coverUrl, description, status } = req.body;
       
       if (!bookId || !title || !status) {
@@ -156,9 +196,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/user/books/:bookId", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/user/books/:bookId", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId!;
       const { bookId } = req.params;
       
       await storage.removeUserBook(userId, bookId);
@@ -169,9 +209,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/user/books/:bookId", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/user/books/:bookId", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId!;
       const { bookId } = req.params;
       const { status } = req.body;
       
@@ -187,9 +227,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/user/books/:bookId", isAuthenticated, async (req: any, res) => {
+  app.get("/api/user/books/:bookId", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId!;
       const { bookId } = req.params;
       
       const book = await storage.getUserBook(userId, bookId);
