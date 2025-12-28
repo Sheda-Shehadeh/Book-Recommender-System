@@ -12,7 +12,6 @@
 - Improving the recommendation model — currently non-personalized due to limited user data.  
 - Adding clickable book pages with detailed information.
 - Improving load time upon startup.
-- After major setbacks, I restarted the process of creating a sign-in system and have now created a functioning sign-in system with the assistance of Replit Agent. Will be updated soon!
 ---
 ### 💡 Future Ideas
 - User login & saving favorite books/creating TBR  
