@@ -6,6 +6,7 @@
 - **Machine Learning (TF-IDF model)** — to analyze book content and recommend titles.  
 - **Google Books API** — provides real book covers and metadata.  
 - **Built with assistance from Replit Agent 3.**
+- **Main languages:** TypeScript, CSS, HTML
 ---
 ### 🚧 Current Improvements
 - Improving the recommendation model — currently non-personalized due to limited user data.  
