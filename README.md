@@ -19,6 +19,6 @@
 ___
 ### ⚙️ Try it yourself!
 Visit this [link](https://book-recomendation-system-shedashehadeh.replit.app)
-- Give it a minute to load, and if no books are appear under "Popular books", please refresh. Working on improving startup load-time currently.
+- Give it a minute to load, and if even then no books  appear under "Popular books", please refresh. Working on improving startup load-time currently.
 
 
